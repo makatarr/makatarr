@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>مقطار</title>
+<style>
+    /* الأنماط (CSS) */
+    body {
+        background: linear-gradient(to bottom, #f7f2e8, #eae3d2);
+        font-family: 'Tahoma', sans-serif;
+        text-align: center;
+        padding: 0; /* تم تعديله ليتناسب مع الشريط العلوي */
+        overflow-x: hidden;
+        position: relative;
+        min-height: 100vh;
+        margin: 0; /* إزالة الهامش الافتراضي للجسم */
+    }
+
+    /* --- التعديل الجديد: شريط الملاحظة العلوي --- */
+    .note-bar {
+        background-color: #C2B280; /* نفس لون الأزرار */
+        color: #333;
+        padding: 10px 20px; /* **تصغير حجم الشريط عموديًا** */
+        font-size: 0.9em; /* **تصغير الخط أكثر** */
+        font-weight: bold;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box; /* لضمان أن الحشو لا يوسع الشريط خارج 100% */
+        position: relative; /* لضمان ظهورها في الأعلى */
+        z-index: 100; /* لضمان ظهورها فوق العناصر الأخرى */
+        line-height: 1.5; /* تحسين تباعد الأسطر */
+    }
+
+    .note-bar .highlight-note {
+        color: red; /* لون أحمر لكلمة "ملاحظة" */
+    }
+    /* --- نهاية تعديل شريط الملاحظة --- */
+
+    h3 {
+        color: #375233;
+        font-size: 20px;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .logo {
+        display: none; /* أو أزله إذا لم يكن مستخدمًا */
+    }
+
+    .top-boxes {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin: 25px 0;
+        /* **التعديل هنا: إضافة مسافة علوية كافية بين الشبكة ومربعات الفرق** */
+        margin-top: 80px;
+    }
+
+    .top-boxes div {
+        width: 120px;
+        height: 90px;
+        line-height: 90px;
+        border-radius: 14px;
+        font-weight: bold;
+        font-size: 36px;
+        color: white; /* لجعل الأرقام بيضاء */
+        display: flex; /* لتمكين وضع الاسم والنقطة فوق بعض */
+        flex-direction: column; /* لتمكين وضع الاسم والنقطة فوق بعض */
+        align-items: center;
+        justify-content: center;
+        position: relative; /* لتمكين وضع اسم الفريق بشكل مطلق */
+    }
+
+    /* **التعديل هنا: تنسيق اسم الفريق داخل المربع** */
+    .top-boxes div .team-name-display {
+        position: absolute;
+        top: -75px; /* **زيادة المسافة بين الاسم والمربع بشكل أكبر** */
+        font-size: 0.9em; /* حجم خط أصغر لاسم الفريق */
+        color: black; /* لون أسود لاسم الفريق */
+        font-weight: bold;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* خط جميل */
+        white-space: nowrap; /* لمنع الكسر في حال الاسم طويل */
+    }
+
+    /* **التعديل هنا: تنسيق الرقم داخل المربع** */
+    .top-boxes div span:last-child {
+        font-size: 1.2em; /* تكبير حجم الرقم قليلاً */
+        display: block; /* لضمان أن يكون في سطر منفصل عن الاسم */
+        line-height: 1; /* ضبط ارتفاع السطر */
+    }
+
+    .box-1 { background-color: #99ccff; }
+    .box-2 { background-color: #ffe066; }
+    .box-3 { background-color: #a8e6a3; }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(8, 90px);
+        grid-template-rows: repeat(8, 90px);
+        gap: 12px;
+        justify-content: center;
+        position: relative; /* لجعلها فوق تأثير السقوط */
+        z-index: 10;
+    }
+
+    .cell {
+        background-color: white;
+        border: 2px solid #a0a087;
+        border-radius: 14px;
+        cursor: pointer;
+        font-size: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .corner {
+        pointer-events: none;
+        background-color: #C2B280 !important;
+        font-size: 48px;
+        transform: rotate(180deg);
+    }
+
+    .buttons {
+        margin-top: 50px;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+    }
+
+    button {
+        padding: 24px 40px;
+        font-size: 26px;
+        color: white;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        background-color: #C2B280; /* لون موحد للزرين */
+    }
+
+    button:hover {
+        background-color: #4f7044;
+    }
+
+    .firework {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background-color: gold;
+        border-radius: 50%;
+        animation: explode 1s ease-out forwards;
+        z-index: 999;
+    }
+
+    @keyframes explode {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(3); opacity: 0; }
+    }
+
+    .congrats-text {
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 90px;
+        color: black;
+        font-weight: bold;
+        display: none;
+        z-index: 1000;
+        text-shadow: 1px 1px 3px #888;
+    }
+
+    /* أنماط الأشكال المتساقطة */
+    .falling-shape {
+        position: absolute;
+        top: -50px; /* تبدأ من خارج الشاشة */
+        width: 30px;
+        height: 30px;
+        background-color: transparent; /* اجعل الخلفية شفافة */
+        border-radius: 50%; /* افتراضي لدائرة */
+        z-index: 1; /* خلف الشبكة */
+        opacity: 0.6; /* تقليل الشفافية قليلاً لجعلها أقل حدة */
+        animation: fall linear infinite;
+    }
+
+    .falling-star {
+        clip-path: polygon(
+            50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
+            50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+        );
+        background-color: #a67c00;
+    }
+
+    .falling-circle {
+        border-radius: 50%;
+        background-color: #c19a6b;
+    }
+
+    @keyframes fall {
+        0% { transform: translateY(-50px) translateX(0) rotate(0deg); opacity: 0.6; }
+        100% { transform: translateY(110vh) translateX(calc(-10% + (var(--random-x) * 120%))) rotate(360deg); opacity: 0.6; }
+    }
+
+    /* تنسيقات نافذة التعليمات المنبثقة */
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1001;
+    }
+
+    .game-instructions-popup {
+        background: white;
+        padding: 30px 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        text-align: center;
+        position: relative;
+        font-size: 20px;
+        color: #333;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    .game-instructions-popup h2 {
+        color: #375233;
+        font-size: 38px;
+        margin-bottom: 25px;
+    }
+
+    .game-instructions-popup p {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        font-size: 22px;
+        text-align: justify;
+        text-align-last: right;
+    }
+
+    .game-instructions-popup ul {
+        list-style: none;
+        padding: 0;
+        text-align: right;
+        margin: 20px 0;
+    }
+
+    .game-instructions-popup ul li {
+        margin-bottom: 10px;
+        font-size: 22px;
+    }
+
+    .game-instructions-popup button {
+        background-color: #375233;
+        color: white;
+        padding: 15px 30px;
+        font-size: 22px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .game-instructions-popup button:hover {
+        background-color: #4f7044;
+    }
+    .advice-list {
+        list-style-type: arabic-indic;
+        padding-right: 25px;
+        text-align: right;
+    }
+    .advice-list li {
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    /* **التعديلات هنا: تنسيقات شاشة تسمية الفرق الجديدة** */
+    .naming-overlay {
+        display: none; /* مخفي في البداية */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(62, 95, 83, 0.7); /* لون أخضر داكن شفاف (RGB لأحد ألوان الخلفية) */
+        backdrop-filter: blur(2px); /* لإضافة تأثير ضبابي خفيف للخلفية */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* لضمان ظهوره فوق كل شيء */
+    }
+    .naming-overlay-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        text-align: center;
+        width: 90%;
+        max-width: 450px;
+    }
+    .naming-overlay-content h2 {
+        color: #375233;
+        margin-bottom: 25px;
+        font-size: 2em;
+    }
+    .naming-overlay-content input[type="text"] {
+        display: block;
+        width: calc(100% - 20px); /* 100% عرض مع مراعاة الحشو */
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1.1em;
+        text-align: right; /* لجعل النص يبدأ من اليمين */
+        direction: rtl; /* لضمان دعم اللغة العربية */
+    }
+    .naming-overlay-content button {
+        padding: 12px 25px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1em;
+        margin-top: 15px;
+    }
+    .naming-overlay-content button:hover {
+        background-color: #45a049;
+    }
+    /* --- نهاية تنسيقات شاشة تسمية الفرق الجديدة --- */
+</style>
+</head>
+<body>
+
+<div class="note-bar">
+    <span class="highlight-note">ملاحظة:</span> هذه النسخة لشخص واحد فقط وغير قابلة للنشر أو البيع ومن يخالف ذلك سيتم اتخاذ الإجراءات القانونية في هذا الأمر وللتذكير بذمتك وأمانتك:
+    "قال ﷺ "لا إيمان لمن لا أمانة له، ولا دين لمن لا عهد له"
+</div>
+
+<img src="https://raw.githubusercontent.com/hhdhdjgjk/New-pro/main/صورة_مقطار-finaly.png" alt="شعار مقطار" width="500">
+
+<div class="top-boxes">
+    <div class="box-1" id="teamBox0">
+        <span class="team-name-display" id="teamName0"></span>
+        <span>٠</span>
+    </div>
+    <div class="box-2" id="teamBox1">
+        <span class="team-name-display" id="teamName1"></span>
+        <span>٠</span>
+    </div>
+    <div class="box-3" id="teamBox2">
+        <span class="team-name-display" id="teamName2"></span>
+        <span>٠</span>
+    </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="buttons">
+    <button onclick="resetGrid()">إعادة تعيين</button>
+    <button onclick="showNamingOverlay()">تسمية الفرق</button>
+</div>
+
+<div id="congratsText" class="congrats-text"></div>
+
+<audio id="clapSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3b5bb8f3b4.mp3"></audio>
+
+<div id="instructionsPopupOverlay" class="popup-overlay" style="display: none;">
+
+    <div id="popup1" class="game-instructions-popup">
+        <h2>نصيحة علشان نلعب ونستانس… بس بدون ما ننسى الأهم </h2>
+        <ul class="advice-list">
+            <li>١. ⏰ "اللعب ممتع، بس خلّه بعد الصلاة، عشان ما تضيع عليك فرض"</li>
+            <li>٢. 📖 "اللعبة حلوة، بس القرآن أحلى، خذ لك وقت بين الجولات وارتّح مع كلام الله."</li>
+            <li>٣. 🙏 "إذا جاء وقت الصلاة، نوقف اللعب ونكسب رضا رب العالمين."</li>
+            <li>٤. ✋ "نلعب ونضحك، لكن ما نخلي اللعب يلهينا عن طاعة الله."</li>
+            <li>٥. 📚 "اللعب ما يمنع إنك تذاكر، نظّم وقتك وخلّ اللعب مكافأة بعد الإنجاز."</li>
+            <li>٦. 🎯 "اللعبة جزء من يومنا، مو كل يومنا… لا تنسى أهدافك وطموحاتك."</li>
+            <li>٧. ⌛ "وقت المذاكرة غالي، لا تخليه يضيع على حساب لعبة ممكن تلعبها بأي وقت."</li>
+        </ul>
+        <p>تذكر <strong>"إذا لعبت وانت محافظ على صلاتك واذكارك وقراءة القران وخلصت المذاكره والاشغال الي عليك … أنت كسبت الدنيا والآخرة بإذن الله"</strong></p>
+        <button onclick="showNextPopup(2)">التالي</button>
+    </div>
+
+    <div id="popup2" class="game-instructions-popup" style="display: none;">
+        <h2>تعليمات لعبة مقطار</h2>
+
+        <h3>■ فكرة اللعبة:</h3>
+        <p>لعبة "مقطار" هي تحدٍّ بين لاعبين (2-3) أو فريقين (2-3)، الهدف فيها هو تكوين مقطارين داخل شبكة المربعات. كل مقطار يتكون من ٤ مربعات متجاورة من نفس اللون.</p>
+
+        <h3>■ شروط الفوز:</h3>
+        <ul>
+            <li>1- يفوز اللاعب أو الفريق الذي يتمكن أولًا من تكوين مقطارين (كل منهما مكوّن من ٤ مربعات متصلة من نفس اللون).</li>
+            <li>2- المقطاران لا يجوز أن يشتركا في أكثر من مربع واحد فقط من المربعات التي تم تلوينها.</li>
+            <li>3- يُسمح أن يبدأ أحد المقطارين أو ينتهي في أحد الزوايا الأربع الثابتة، وتُعتبر هذه الزوايا نقطة محايدة يمكن للجميع استخدامها بحرية في تكوين المقاطير دون أن يؤثر ذلك على شرط التداخل.</li>
+        </ul>
+        <h3>تفاصيل المقطار:</h3>
+        <p>يمكن أن يكون المقطار في شكل خط مستقيم (أفقي أو رأسي أو قطري) من ٤ مربعات من نفس اللون.</p>
+
+        <h3>■ الزوايا الثابتة:</h3>
+        <p>الزوايا الأربع لا يمكن تغيير لونها ولكن يمكن استخدامها كنقطة بداية أو نهاية لأي مقطار من أي فريق. وتُحتسب ضمن "عدد" المربعات الأربعة.</p>
+
+        <h3>■ طريقة اللعب:</h3>
+        <p>عند النقر على مربع، يتغيّر لونه بالتسلسل: أبيض ← أزرق فاتح ← أصفر فاتح ← أخضر فاتح ← أبيض.</p>
+        <p>كل لاعب أو فريق يختار لونًا ويعمل على بناء المقطارات حسب دوره. في كل دور يتم توجيه سؤال للفريق باستخدام ملف الأسئلة وعند الإجابة الصحيحة يقوم الفريق بتلوين مربع بلونه وهكذا كل فريق عند دوره يقوم بنفس الخطوات والهدف بناء مقطارين من ٤ مربعات بلون الفريق.</p>
+
+        <h3>■ أزرار التحكم:</h3>
+        <p><strong>زر إعادة تعيين:</strong> يعيد الشبكة إلى حالتها الأصلية (كل المربعات بيضاء ما عدا الزوايا).</p>
+
+        <button onclick="closeInstructionsPopup()">ابدأ اللعب</button>
+    </div>
+
+</div>
+
+<div id="namingOverlay" class="naming-overlay">
+    <div class="naming-overlay-content">
+        <h2>تسمية الفرق</h2>
+        <input type="text" id="inputTeam0" placeholder="اسم الفريق الأول (الأزرق)">
+        <input type="text" id="inputTeam1" placeholder="اسم الفريق الثاني (الأصفر)">
+        <input type="text" id="inputTeam2" placeholder="اسم الفريق الثالث (الأخضر)">
+        <button id="saveTeamNamesBtn">حفظ الأسماء</button>
+    </div>
+</div>
+
+<script>
+    const colors = ["white", "#99ccff", "#ffe066", "#a8e6a3"];
+    const grid = document.getElementById("grid");
+    const rows = 8;
+    const cols = 8;
+
+    // تعريف الزوايا الأربع
+    const cornerCellIndices = [0, cols - 1, rows * cols - cols, rows * cols - 1];
+
+    const gridData = new Array(rows * cols).fill(0); // 0 for white, 1 for blue, 2 for yellow, 3 for green
+    let currentPopupIndex = 1;
+
+    // **التعديل هنا: تعريف عناصر شاشة تسمية الفرق**
+    const namingOverlay = document.getElementById('namingOverlay');
+    const saveTeamNamesBtn = document.getElementById('saveTeamNamesBtn');
+    const teamNameDisplays = [
+        document.getElementById('teamName0'),
+        document.getElementById('teamName1'),
+        document.getElementById('teamName2')
+    ];
+    const teamInputFields = [
+        document.getElementById('inputTeam0'),
+        document.getElementById('inputTeam1'),
+        document.getElementById('inputTeam2')
+    ];
+
+    function indexToRC(index) {
+        return { row: Math.floor(index / cols), col: index % cols };
+    }
+
+    function rcToIndex(r, c) {
+        return r * cols + c;
+    }
+
+    // إنشاء خلايا الشبكة عند تحميل الصفحة
+    for (let i = 0; i < rows * cols; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+
+        if (cornerCellIndices.includes(i)) {
+            cell.classList.add("corner");
+            cell.textContent = "Ã"; // يمكن تغيير هذا الحرف لرمز آخر يمثل الزاوية
+        } else {
+            cell.dataset.index = i; // تخزين index الخلية
+            cell.onclick = (event) => {
+                const cellIndex = parseInt(event.target.dataset.index);
+                let currentIndex = gridData[cellIndex]; // استخدام cellIndex للوصول للعنصر الصحيح
+                let nextIndex = (currentIndex + 1) % colors.length;
+                gridData[cellIndex] = nextIndex; // تحديث العنصر الصحيح في gridData
+                event.target.style.backgroundColor = colors[nextIndex]; // تطبيق اللون الصحيح
+                checkForCongrats();
+            };
+        }
+        grid.appendChild(cell); // هذا السطر هو الذي يضيف المربع إلى الشبكة
+    }
+
+    // دالة جديدة للتحقق من الصف أو العمود أو القطر الكامل من الزاوية إلى الزاوية
+    function isFullLineCornerToCorner(targetColorIndex) {
+        // التحقق من جميع الصفوف الأفقية
+        for (let r = 0; r < rows; r++) {
+            let allCellsMatch = true;
+            for (let c = 0; c < cols; c++) {
+                const idx = rcToIndex(r, c);
+                if (!cornerCellIndices.includes(idx)) { // إذا لم تكن خلية زاوية
+                    if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
+                        allCellsMatch = false;
+                        break;
+                    }
+                }
+            }
+            if (allCellsMatch) {
+                return true; // تم العثور على صف أفقي كامل
+            }
+        }
+
+        // التحقق من جميع الأعمدة العمودية
+        for (let c = 0; c < cols; c++) {
+            let allCellsMatch = true;
+            for (let r = 0; r < rows; r++) {
+                const idx = rcToIndex(r, c);
+                if (!cornerCellIndices.includes(idx)) { // إذا لم تكن خلية زاوية
+                    if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
+                        allCellsMatch = false;
+                        break;
+                    }
+                }
+            }
+            if (allCellsMatch) {
+                return true; // تم العثور على عمود عمودي كامل
+            }
+        }
+
+        // التحقق من القطر الرئيسي (\)
+        let allCellsMatchMainDiagonal = true;
+        for (let i = 0; i < rows; i++) { // بما أن الشبكة 8x8، rows == cols
+            const idx = rcToIndex(i, i);
+            if (!cornerCellIndices.includes(idx)) {
+                if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
+                    allCellsMatchMainDiagonal = false;
+                    break;
+                }
+            }
+        }
+        if (allCellsMatchMainDiagonal) {
+            return true;
+        }
+
+        // التحقق من القطر الثانوي (/)
+        let allCellsMatchAntiDiagonal = true;
+        for (let i = 0; i < rows; i++) {
+            const idx = rcToIndex(i, cols - 1 - i);
+            if (!cornerCellIndices.includes(idx)) {
+                if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
+                    allCellsMatchAntiDiagonal = false;
+                    break;
+                }
+            }
+        }
+        if (allCellsMatchAntiDiagonal) {
+            return true;
+        }
+
+        return false; // لم يتم العثور على أي خط كامل من الزاوية للزاوية
+    }
+
+
+    function checkForCongrats() {
+        let allTrainsFound = {
+            1: [], // للمقطارات الزرقاء
+            2: [], // للمقطارات الصفراء
+            3: []  // للمقطارات الخضراء
+        };
+
+        // Helper function to get cell color, treating corners as "wildcards"
+        function getEffectiveCellColor(idx, targetColorIndex) {
+            if (cornerCellIndices.includes(idx)) {
+                return targetColorIndex; // Corner acts as the target color if it's part of a potential train
+            }
+            return gridData[idx]; // استخدم gridData[idx]
+        }
+
+        // Helper function to check for a 4-square train
+        // هذا الجزء سيكتشف المقاطير التي تتضمن 3 خلايا + زاوية (لأن الزاوية تُعتبر بلون الفريق)
+        function checkLine(r, c, dr, dc, targetColorIndex) {
+            const line = []; // Stores all 4 cell indices (including corners)
+            const nonCornerCells = []; // Stores only non-corner cells in this train
+
+            for (let i = 0; i < 4; i++) {
+                const currR = r + i * dr;
+                const currC = c + i * dc;
+                if (currR < 0 || currR >= rows || currC < 0 || currC >= cols) {
+                    return null;
+                }
+                const idx = rcToIndex(currR, currC);
+
+                // Check if the cell (or effective corner) matches the target color
+                if (getEffectiveCellColor(idx, targetColorIndex) !== targetColorIndex) {
+                    return null;
+                }
+                line.push(idx); // Add to the full line
+                if (!cornerCellIndices.includes(idx)) {
+                    nonCornerCells.push(idx); // Only add non-corner cells here
+                }
+            }
+
+            // Ensure no 5th consecutive cell of the same color (to ensure it's exactly 4)
+            const nextR = r + 4 * dr;
+            const nextC = c + 4 * dc;
+            if (nextR >= 0 && nextR < rows && nextC >= 0 && nextC < cols) {
+                const nextIdx = rcToIndex(nextR, nextC);
+                if (getEffectiveCellColor(nextIdx, targetColorIndex) === targetColorIndex) {
+                    return null; // A 5th cell means this isn't a 4-cell train
+                }
+            }
+            return { line: new Set(line), nonCornerCells: new Set(nonCornerCells) };
+        }
+
+        // Collect all possible trains for each color
+        for (let targetColorIndex = 1; targetColorIndex <= 3; targetColorIndex++) {
+            // Horizontal
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c <= cols - 4; c++) {
+                    const train = checkLine(r, c, 0, 1, targetColorIndex);
+                    if (train) allTrainsFound[targetColorIndex].push(train);
+                }
+            }
+
+            // Vertical
+            for (let c = 0; c < cols; c++) {
+                for (let r = 0; r <= rows - 4; r++) {
+                    const train = checkLine(r, c, 1, 0, targetColorIndex);
+                    if (train) allTrainsFound[targetColorIndex].push(train);
+                }
+            }
+
+            // Diagonal \
+            for (let r = 0; r <= rows - 4; r++) {
+                for (let c = 0; c <= cols - 4; c++) {
+                    const train = checkLine(r, c, 1, 1, targetColorIndex);
+                    if (train) allTrainsFound[targetColorIndex].push(train);
+                }
+            }
+
+            // Diagonal /
+            for (let r = 0; r <= rows - 4; r++) {
+                for (let c = 3; c < cols; c++) {
+                    const train = checkLine(r, c, 1, -1, targetColorIndex);
+                    if (train) allTrainsFound[targetColorIndex].push(train);
+                }
+            }
+        }
+
+        // Calculate final valid trains count for each color
+        let finalTrainsCountColor1 = 0;
+        let finalTrainsCountColor2 = 0;
+        let finalTrainsCountColor3 = 0;
+
+        for (let targetColorIndex = 1; targetColorIndex <= 3; targetColorIndex++) {
+            let currentWinningTrainsCount = 0;
+
+            // الأولوية الأولى: التحقق من حالة الصف أو العمود أو القطر الكامل من الزاوية إلى الزاوية
+            if (isFullLineCornerToCorner(targetColorIndex)) {
+                currentWinningTrainsCount = 2; // إذا كان خط كامل، يحصل على مقطارين مباشرة
+            } else {
+                // إذا لم يكن خط كامل، نعود لمنطق البحث عن زوجين مع تداخل خلية واحدة
+                const trainsOfCurrentColor = allTrainsFound[targetColorIndex];
+                const uniqueTrains = [];
+                const uniqueTrainLineStrings = new Set();
+                for (const train of trainsOfCurrentColor) {
+                    // استخدام جميع الخلايا في الخط (بما في ذلك الزوايا) لتعريف المقطار بشكل فريد
+                    const trainString = Array.from(train.line).sort((a, b) => a - b).join(',');
+                    if (!uniqueTrainLineStrings.has(trainString)) {
+                        uniqueTrains.push(train);
+                        uniqueTrainLineStrings.add(trainString);
+                    }
+                }
+
+                if (uniqueTrains.length >= 2) {
+                    let foundValidPair = false;
+                    for (let i = 0; i < uniqueTrains.length; i++) {
+                        for (let j = i + 1; j < uniqueTrains.length; j++) {
+                            const trainA = uniqueTrains[i];
+                            const trainB = uniqueTrains[j];
+
+                            // حساب الخلايا غير الزاوية المشتركة
+                            let commonNonCornerCellsCount = 0;
+                            for (const cellIdx of trainA.nonCornerCells) {
+                                if (trainB.nonCornerCells.has(cellIdx)) {
+                                    commonNonCornerCellsCount++;
+                                }
+                            }
+
+                            // الشرط: لا يجوز أن يشتركا في أكثر من مربع واحد فقط من المربعات الملونة (غير الزوايا)
+                            if (commonNonCornerCellsCount <= 1) {
+                                foundValidPair = true;
+                                currentWinningTrainsCount = 2; // تم العثور على مقطارين
+                                break;
+                            }
+                        }
+                        if (foundValidPair) break;
+                    }
+                    if (!foundValidPair && uniqueTrains.length > 0) {
+                        currentWinningTrainsCount = 1; // إذا وجد مقطار واحد على الأقل ولم يجد زوج
+                    } else if (!foundValidPair) {
+                        currentWinningTrainsCount = 0;
+                    }
+                } else {
+                    currentWinningTrainsCount = uniqueTrains.length; // عدد المقاطير المكتشفة (0 أو 1)
+                }
+            }
+
+            // **التعديل هنا: تحديث النصوص في مربعات النقاط**
+            if (targetColorIndex === 1) { // أزرق
+                document.getElementById('teamBox0').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
+                finalTrainsCountColor1 = currentWinningTrainsCount;
+            } else if (targetColorIndex === 2) { // أصفر
+                document.getElementById('teamBox1').querySelector('span:last-child').textContent = '٠' + currentWinningTrainsCount.toString(); // Updated to include Arabic zero for single digit
+                finalTrainsCountColor2 = currentWinningTrainsCount;
+            } else if (targetColorIndex === 3) { // أخضر
+                document.getElementById('teamBox2').querySelector('span:last-child').textContent = '٠' + currentWinningTrainsCount.toString(); // Updated to include Arabic zero for single digit
+                finalTrainsCountColor3 = currentWinningTrainsCount;
+            }
+        }
+
+        let winnerMessage = "";
+        if (finalTrainsCountColor1 >= 2) {
+            const teamName = teamNameDisplays[0].textContent.trim();
+            winnerMessage = `مبروك لـ ${teamName || 'الفريق الأزرق'} 🎉`;
+        } else if (finalTrainsCountColor2 >= 2) {
+            const teamName = teamNameDisplays[1].textContent.trim();
+            winnerMessage = `مبروك لـ ${teamName || 'الفريق الأصفر'} 🎉`;
+        } else if (finalTrainsCountColor3 >= 2) {
+            const teamName = teamNameDisplays[2].textContent.trim();
+            winnerMessage = `مبروك لـ ${teamName || 'الفريق الأخضر'} 🎉`;
+        }
+
+        if (winnerMessage !== "") {
+            showCongrats(winnerMessage);
+        }
+    }
+
+    function resetGrid() {
+        // إعادة تعيين جميع الخلايا غير الزاوية إلى اللون الأبيض
+        for (let i = 0; i < rows * cols; i++) {
+            if (!cornerCellIndices.includes(i)) {
+                gridData[i] = 0; // إعادة تعيين قيمة اللون في البيانات
+                const cellElement = grid.children[i];
+                cellElement.style.backgroundColor = colors[0]; // إعادة اللون الأبيض
+            }
+        }
+
+        document.getElementById("congratsText").style.display = "none";
+        // **التعديل هنا: تصفير النقاط ومسح أسماء الفرق**
+        document.getElementById('teamBox0').querySelector('span:last-child').textContent = '٠';
+        document.getElementById('teamBox1').querySelector('span:last-child').textContent = '٠';
+        document.getElementById('teamBox2').querySelector('span:last-child').textContent = '٠';
+
+        teamNameDisplays.forEach(span => span.textContent = ''); // مسح أسماء الفرق
+        teamInputFields.forEach(input => input.value = ''); // مسح حقول الإدخال في نافذة التسمية
+    }
+
+    function showCongrats(message) {
+        const sound = document.getElementById("clapSound");
+        const text = document.getElementById("congratsText");
+        sound.currentTime = 0;
+        sound.play();
+
+        text.textContent = message;
+        text.style.display = "block";
+        setTimeout(() => { text.style.display = "none"; }, 2000);
+
+        for (let i = 0; i < 50; i++) {
+            const firework = document.createElement("div");
+            firework.className = "firework";
+            firework.style.top = Math.random() * window.innerHeight + "px";
+            firework.style.left = Math.random() * window.innerWidth + "px";
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 1000);
+        }
+    }
+
+    function showNextPopup(nextIndex) {
+        document.getElementById('popup' + currentPopupIndex).style.display = 'none';
+
+        if (nextIndex <= 2) {
+            document.getElementById('popup' + nextIndex).style.display = 'block';
+            currentPopupIndex = nextIndex;
+        } else {
+            closeInstructionsPopup();
+        }
+    }
+
+    function closeInstructionsPopup() {
+        document.getElementById("instructionsPopupOverlay").style.display = "none";
+    }
+
+    // دالة لإنشاء شكل متساقط
+    function createFallingShape() {
+        const shapes = [
+            { className: 'falling-star' },
+            { className: 'falling-circle' }
+        ];
+        // اختيار شكل عشوائي من المصفوفة
+        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+
+        const shapeDiv = document.createElement('div');
+        shapeDiv.classList.add('falling-shape', randomShape.className);
+        shapeDiv.style.left = Math.random() * 100 + 'vw'; // موقع عشوائي أفقي
+        shapeDiv.style.setProperty('--random-x', Math.random()); // متغير CSS لحركة أفقية عشوائية
+        shapeDiv.style.animationDuration = (Math.random() * 12 + 12) + 's'; // سرعة أبطأ (12-24 ثواني)
+        shapeDiv.style.animationDelay = (Math.random() * -20) + 's'; // تأخير عشوائي أكبر لتبدو كأنها مستمرة
+        shapeDiv.style.opacity = 0.5 + Math.random() * 0.3; // تفاوت في الشفافية
+
+        // تحديد لون الخلفية
+        if (randomShape.className === 'falling-circle') {
+            shapeDiv.style.backgroundColor = '#c19a6b';
+        } else if (randomShape.className === 'falling-star') {
+            shapeDiv.style.backgroundColor = '#a67c00';
+        }
+
+        document.body.appendChild(shapeDiv);
+
+        // إعادة ضبط موضع الشكل عند انتهاء الأنميشن ليعطي إحساساً بالسقوط المستمر
+        shapeDiv.addEventListener('animationiteration', () => {
+            shapeDiv.style.left = Math.random() * 100 + 'vw';
+            shapeDiv.style.setProperty('--random-x', Math.random());
+            shapeDiv.style.animationDuration = (Math.random() * 12 + 12) + 's';
+            shapeDiv.style.opacity = 0.5 + Math.random() * 0.3;
+        });
+    }
+
+    // إنشاء الأشكال المتساقطة بشكل مستمر
+    function startFallingShapes() {
+        const numberOfShapes = 5; // عدد أقل لجعلها ليست كثيرة
+        for (let i = 0; i < numberOfShapes; i++) {
+            createFallingShape();
+        }
+    }
+
+    // **التعديل هنا: وظائف تسمية الفرق**
+    function showNamingOverlay() {
+        namingOverlay.style.display = 'flex';
+        // تعبئة حقول الإدخال بأسماء الفرق الحالية
+        teamInputFields.forEach((input, index) => {
+            input.value = teamNameDisplays[index].textContent.trim();
+        });
+    }
+
+    saveTeamNamesBtn.addEventListener('click', () => {
+        teamInputFields.forEach((input, index) => {
+            teamNameDisplays[index].textContent = input.value.trim();
+        });
+        namingOverlay.style.display = 'none';
+    });
+
+    // إخفاء الشاشة بالنقر خارج المحتوى
+    namingOverlay.addEventListener('click', (e) => {
+        if (e.target === namingOverlay) {
+            namingOverlay.style.display = 'none';
+        }
+    });
+
+
+    window.onload = () => {
+        document.getElementById("instructionsPopupOverlay").style.display = "flex";
+        document.getElementById('popup1').style.display = 'block';
+        currentPopupIndex = 1;
+
+        // **التعديل هنا: التأكد من إفراغ أسماء الفرق عند التحميل وتصفير النقاط**
+        teamNameDisplays.forEach(span => span.textContent = '');
+        document.getElementById('teamBox0').querySelector('span:last-child').textContent = '٠';
+        document.getElementById('teamBox1').querySelector('span:last-child').textContent = '٠';
+        document.getElementById('teamBox2').querySelector('span:last-child').textContent = '٠';
+
+
+        startFallingShapes(); // ابدأ تأثير سقوط الأشكال
+    };
+</script>
+</body>
+</html>

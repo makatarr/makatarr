@@ -705,10 +705,10 @@
                 document.getElementById('teamBox0').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
                 finalTrainsCountColor1 = currentWinningTrainsCount;
             } else if (targetColorIndex === 2) { // أصفر
-                document.getElementById('teamBox1').querySelector('span:last-child').textContent = '٠' + currentWinningTrainsCount.toString().padStart(1, '٠'); // Updated to include Arabic zero for single digit
+                document.getElementById('teamBox1').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
                 finalTrainsCountColor2 = currentWinningTrainsCount;
             } else if (targetColorIndex === 3) { // أخضر
-                document.getElementById('teamBox2').querySelector('span:last-child').textContent = '٠' + currentWinningTrainsCount.toString().padStart(1, '٠'); // Updated to include Arabic zero for single digit
+                document.getElementById('teamBox2').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
                 finalTrainsCountColor3 = currentWinningTrainsCount;
             }
         }
@@ -869,6 +869,3 @@
 </script>
 </body>
 </html>
-
-
-
